@@ -1,0 +1,31 @@
+{
+  "name": "streamguard",
+  "version": "1.0.0",
+  "description": "High-throughput distributed event ingestion pipeline",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Tests not configured yet\""
+  },
+  "keywords": [
+    "nodejs",
+    "fastify",
+    "redis",
+    "postgresql",
+    "distributed-systems",
+    "event-ingestion"
+  ],
+  "author": "Minhaaz Ahmad",
+  "license": "MIT",
+  "dependencies": {
+    "bullmq": "^6.3.10",
+    "dotenv": "^18.0.5",
+    "fastify": "^5.6.0",
+    "ioredis": "^6.0.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
