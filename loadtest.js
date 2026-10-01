@@ -1,3 +1,4 @@
+require("dotenv").config();
 const autocannon = require("autocannon");
 
 const options = {
@@ -7,7 +8,8 @@ const options = {
   method: "POST",
 
   headers: {
-    "content-type": "application/json"
+    "content-type": "application/json",
+    "x-api-key": process.env.API_KEY
   },
 
   body: JSON.stringify({
