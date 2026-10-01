@@ -9,6 +9,22 @@ services:
     environment:
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:3000/api/v1/health"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
     depends_on:
       - redis
       - postgres

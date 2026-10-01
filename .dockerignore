@@ -1,0 +1,6 @@
+node_modules
+.git
+.tap
+.env
+npm-debug.log*
+*.log
