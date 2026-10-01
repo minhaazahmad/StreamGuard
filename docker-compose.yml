@@ -1,4 +1,33 @@
 services:
+  api:
+    build: .
+    container_name: streamguard-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build: .
+    container_name: streamguard-worker
+    command: ["node", "src/workers/event.worker.js"]
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+    ports:
+      - "3001:3001"
+    depends_on:
+      - redis
+      - postgres
+
   redis:
     image: redis:7-alpine
     container_name: streamguard-redis
