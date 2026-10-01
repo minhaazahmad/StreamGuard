@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "autocannon": "^8.0.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "tap": "^21.8.0"
   }
 }
