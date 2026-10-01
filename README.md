@@ -338,3 +338,35 @@ StreamGuard/
 Author
 Minhaaz Ahmad
 Software Engineer focused on backend development, AI engineering, and intelligent automation.
+
+## 📸 Screenshots
+
+### Swagger API Documentation
+
+StreamGuard exposes an OpenAPI/Swagger interface for exploring and testing the available API endpoints, including authentication, event ingestion, health checks, and Dead Letter Queue operations.
+
+![Swagger API Documentation](docs/screenshots/swagger.png)
+
+### Grafana Monitoring Dashboard
+
+The Grafana dashboard provides real-time visibility into event processing, received events, failures, events per second, and Dead Letter Queue activity.
+
+![Grafana Monitoring Dashboard](docs/screenshots/grafana-dashboard.png)
+
+### Dockerized Infrastructure
+
+The complete StreamGuard stack runs through Docker Compose with API, worker, Redis, PostgreSQL, Prometheus, and Grafana services.
+
+![Dockerized Infrastructure](docs/screenshots/docker-desktop.png)
+
+### Prometheus Metrics
+
+Prometheus collects and exposes StreamGuard application metrics from the API and worker services.
+
+![Prometheus Metrics](docs/screenshots/prometheus-query.png)
+
+### End-to-End Event Processing
+
+The event ingestion flow was verified end-to-end from the API through the queue and worker into PostgreSQL, where the test event was recorded with processed status.
+
+![End-to-End Event Processing](docs/screenshots/e2e-processing.png)
