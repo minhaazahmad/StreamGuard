@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const { Worker } = require("bullmq");
 const http = require("http");
 
@@ -82,7 +84,10 @@ updateDlqMetric();
 
 
 // Update every 5 seconds
-setInterval(updateDlqMetric, 5000);
+const dlqMetricInterval = setInterval(
+  updateDlqMetric,
+  5000
+);
 
 
 // ==========================================
@@ -215,12 +220,44 @@ const flushBatch = async () => {
 
 
 // ==========================================
+// Flush All Remaining Batches
+// ==========================================
+
+const flushAllBatches = async () => {
+
+  if (batchTimer) {
+    clearTimeout(batchTimer);
+    batchTimer = null;
+  }
+
+  while (
+    eventBuffer.length > 0 ||
+    batchFlushInProgress
+  ) {
+
+    if (!batchFlushInProgress && eventBuffer.length > 0) {
+      await flushBatch();
+    }
+
+    if (batchFlushInProgress) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+    }
+  }
+};
+
+
+// ==========================================
 // Schedule Batch Flush
 // ==========================================
 
 function scheduleBatchFlush() {
 
-  if (batchTimer || batchFlushInProgress) {
+  if (
+    batchTimer ||
+    batchFlushInProgress
+  ) {
     return;
   }
 
@@ -296,7 +333,9 @@ const eventWorker = new Worker(
     // Test Failure
     // ------------------------------------------
 
-    if (event.payload?.forceFail === true) {
+    if (
+      event.payload?.forceFail === true
+    ) {
 
       throw new Error(
         "Intentional failure for DLQ test"
@@ -309,13 +348,6 @@ const eventWorker = new Worker(
     // ------------------------------------------
 
     await enqueueEvent(event);
-
-
-    // ------------------------------------------
-    // Success Log
-    // ------------------------------------------
-
-   
   },
 
   {
@@ -329,10 +361,6 @@ console.log(
   "StreamGuard event worker started"
 );
 
-
-// ==========================================
-// Job Completed
-// ==========================================
 
 // ==========================================
 // Job Failed
@@ -382,7 +410,8 @@ eventWorker.on(
               new Date().toISOString()
           }
         );
-   
+
+
         console.log(
           `Event moved to Dead Letter Queue: ${job.id}`
         );
@@ -406,32 +435,51 @@ eventWorker.on(
 // Graceful Shutdown
 // ==========================================
 
-process.on("SIGINT", async () => {
+let shuttingDown = false;
+
+
+const shutdown = async (signal) => {
+
+  if (shuttingDown) {
+    return;
+  }
+
+  shuttingDown = true;
+
 
   console.log(
-    "\nShutting down StreamGuard worker..."
+    `\n${signal} received. Shutting down StreamGuard worker...`
   );
 
 
   try {
 
     // ----------------------------------------
-    // Flush Remaining Events
+    // Stop accepting new jobs
     // ----------------------------------------
 
-    if (batchTimer) {
-      clearTimeout(batchTimer);
-      batchTimer = null;
-    }
-
-    await flushBatch();
+    await eventWorker.pause();
 
 
     // ----------------------------------------
-    // Close Worker
+    // Wait for currently running jobs
     // ----------------------------------------
 
     await eventWorker.close();
+
+
+    // ----------------------------------------
+    // Flush all remaining events
+    // ----------------------------------------
+
+    await flushAllBatches();
+
+
+    // ----------------------------------------
+    // Stop DLQ metric interval
+    // ----------------------------------------
+
+    clearInterval(dlqMetricInterval);
 
 
     // ----------------------------------------
@@ -477,4 +525,19 @@ process.on("SIGINT", async () => {
 
     process.exit(1);
   }
-});
+};
+
+
+// ==========================================
+// Shutdown Signals
+// ==========================================
+
+process.on(
+  "SIGINT",
+  () => shutdown("SIGINT")
+);
+
+process.on(
+  "SIGTERM",
+  () => shutdown("SIGTERM")
+);
